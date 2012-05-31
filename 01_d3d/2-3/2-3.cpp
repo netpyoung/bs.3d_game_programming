@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include <d3d9.h>
+#include <d3dx9math.h>
 #define _E_INIT_STRUCT(x) ZeroMemory( &x, sizeof(x) )
 #define _E_RELEASE(x)     if ( x ) { x->Release(); x = NULL; }
 
@@ -54,15 +55,31 @@ HRESULT InitD3D( HWND hWnd )
 VOID SetupMatrices()
 {
     // world
-    D3DXMATRIXA16 matWorld;
+    D3DXMATRIXA16 world_matrix;
 
     UINT t = timeGetTime() % 1000;
     FLOAT angle = t * (2.0f * D3DX_PI) / 1000.0f;
-    D3DXMatrixRotationY( &matWorld, angle );
-    g_pd3dDevice->SetTransform( D3DTS_WORLD, &matWorld );
+    D3DXMatrixRotationY( &world_matrix, angle );
+    g_pd3dDevice->SetTransform( D3DTS_WORLD, &world_matrix );
     
     // view
+	D3DXMATRIXA16 view_matrix;
+
+	D3DXVECTOR3 eye_pos( 0.0f, 3.0f, -5.0f );
+	D3DXVECTOR3 look_dir( 0.0f, 0.0f, 0.0f );
+	D3DXVECTOR3 upper_vector ( 0.0f, 1.0f, 0.0f );
+
+	D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_dir, &upper_vector );
+	g_pd3dDevice->SetTransform( D3DTS_VIEW, &view_matrix );
+
     // projection
+	D3DXMATRIXA16 proj_matrix;
+	float fov = D3DX_PI / 4; // Field Of View
+	float ar  = 1.0f;        // aspect ratio
+	float ncp = 1.0f;        // near clipping plane
+	float fcp = 100.0f;      // far clipping plane
+	D3DXMatrixPerspectiveLH( &proj_matrix, fov, ar, ncp, fcp );
+	g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &proj_matrix );
 }
 
 
