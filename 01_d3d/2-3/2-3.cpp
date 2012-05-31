@@ -59,7 +59,8 @@ VOID SetupMatrices()
 
     UINT t = timeGetTime() % 1000;
     FLOAT angle = t * (2.0f * D3DX_PI) / 1000.0f;
-    D3DXMatrixRotationY( &world_matrix, angle );
+    //D3DXMatrixRotationY( &world_matrix, angle );
+    D3DXMatrixRotationY( &world_matrix, D3DX_PI * 10 );
     g_pd3dDevice->SetTransform( D3DTS_WORLD, &world_matrix );
     
     // view
@@ -69,6 +70,7 @@ VOID SetupMatrices()
     D3DXVECTOR3 look_pos( 0.0f, 0.0f, 0.0f );
     D3DXVECTOR3 upper_vector ( 0.0f, 1.0f, 0.0f );
 
+    //D3DXMatrixLookAtRH( &view_matrix, &eye_pos, &look_pos, &upper_vector );
     D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_pos, &upper_vector );
     g_pd3dDevice->SetTransform( D3DTS_VIEW, &view_matrix );
 
@@ -79,6 +81,7 @@ VOID SetupMatrices()
     float ar  = 1.0f;        // aspect ratio
     float ncp = 1.0f;        // near clipping plane
     float fcp = 100.0f;      // far clipping plane
+    //D3DXMatrixPerspectiveRH( &proj_matrix, fov, ar, ncp, fcp );
     D3DXMatrixPerspectiveLH( &proj_matrix, fov, ar, ncp, fcp );
     g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &proj_matrix );
 }
