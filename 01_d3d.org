@@ -60,14 +60,13 @@ HRESULT CreateDevice(
 --------------------------------------------------------------------------------
 *** 03. 정점버퍼
 - 소스 : 2-2 참조
-
-GetMessage()  : 새로 들어온 메시지가, 이전 들어온 메시지와 같으면 대기상태
-PeekMessage() : 메시지가 있으면 처리, 없으면 곧바로 다음 문장으로
-
-정점버퍼 : 비디오메모리 | 시스템메모리
+- Message처리방식
+  - GetMessage()  : 새로 들어온 메시지가, 이전 들어온 메시지와 같으면 대기상태
+  - PeekMessage() : 메시지가 있으면 처리, 없으면 곧바로 다음 문장으로
+- 정점버퍼 : 비디오메모리 | 시스템메모리
  - 비디오메모리 : GPU에 의해 정점쉐이더, T&L(Tranformation & Lighting가속) 등 하드웨어 가속 이용가능. 메모리제약
  - 시스템메모리 : 하드웨어 가속 불가능. 보다 풍부한 메모리
- 
+
 #+BEGIN_SRC c++
 // IDirect3DDevice9::CreateVertexBuffer method 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/bb174364%28v=vs.85%29.aspx
@@ -81,6 +80,15 @@ HRESULT CreateVertexBuffer(
   [in]           HANDLE *pSharedHandle // 예약됨(무조건 NULL)
 );
 #+END_SRC
+- 버퍼 3종류.
+  - mixed모드 같은 경우, 디바이스 생성후 software와 hardware간의 변경이 필요할때 필요함.
+    1. D3DCREATE_HARDWARE_VERTEXPROCESSING
+       - Usage(must) : 0
+    2. D3DCREATE_SOFTWARE_VERTEXPROCESSING
+       - Usage(must) : 0 | D3DUSAGE_SOFTWAREPROCESSING
+    3. D3DCREATE_MIXED_VERTEXPROCESSING
+       - Usage(can) : 0 | D3DUSAGE_SOFTWAREPROCESSING
+       - IDirect3DDevice9::SetStreamSource과 IDirect3DDevice9::SetRenderState를 이용하여 vertex를 설정
 
 #+BEGIN_SRC c++
 // IDirect3DIndexBuffer9::Lock method
@@ -125,7 +133,7 @@ HRESULT SetFVF(
 HRESULT DrawPrimitive(
   [in]  D3DPRIMITIVETYPE PrimitiveType, // enum D3DPRIMITIVETYPE (D3DPT_POINTLIST | D3DPT_LINELIST | D3DPT_LINESTRIP | D3DPT_TRIANGLELIST | D3DPT_TRIANGLESTRIP | D3DPT_TRIANGLEFAN | D3DPT_FORCE_DWORD )
   [in]  UINT StartVertex,   // 로드될 첫번째 vertex의 인덱스
-  [in]  UINT PrimitiveCount // 
+  [in]  UINT PrimitiveCount // D3DCAPS9 구초체의 MaxPrimitiveCount를 검사시 이용되는 수. 선이라면 2개, 삼각형이라면 3개가될꺼임.
 );
 
 // :NOTE 변종 - *DrwaIndexedPrimitive(가장빠름), DrawPrimitiveUP, *DrawIndexedPrimitiveUP, ...
@@ -135,37 +143,56 @@ HRESULT DrawPrimitive(
 :TODO 균질 좌표계(Homogeneous Coordinate System)란?
 
 :TODO FVF(Flexible Vertex Format) 구조 44page
-[[file:./imgs/fvfmem.gif]]
 
-:TODO 소스 MSDN및 하단 링크 읽기
+:TODO 하단 링크 읽기
 - Indexed Vertex Blending (Direct3D 9) http://msdn.microsoft.com/en-us/library/windows/desktop/bb174594%28v=vs.85%29.aspx
 - Using Indexed Vertex Blending (Direct3D 9)  http://msdn.microsoft.com/en-us/library/windows/desktop/bb206316%28v=vs.85%29.aspx
 - 3D Game Programming Basic with Direct3D  https://docs.google.com/viewer?a=v&q=cache:m1P_e1MuIKMJ:3dapi.com/bs22_3d_basic/bs22_3d05_primitive.pdf+Flexible+Vertex+Format+blending+weight+5th&hl=ko&gl=jp&pid=bl&srcid=ADGEESgHoE32epxY639jEd1m8feErtJZKiBeH5ALptLVe3YKrvT75rmT_DzmURRUcQTlM3L7IBIlF0mkBIKdK2QidSzqmRYDh8cKMXg4bCn2JWZujwZmLuZ8XkLhjowLPvE4YH6sFh_y&sig=AHIEtbRwDxKOyl7XEXb-XMiAqCyF3xucaQ
 
-
---------------------------------------------------------------------------------
 *** 04. 행렬
-world, view(camera), projection
+- world, view(camera), projection
+  1. world : 물체를 서로 다르게 출력하기 위한 좌표계
+     - TM(Transform Matrix)
+       - local =TM=> world
+       - TM은 모든 물체마다 고유하게 하나씩 존재
+       - SetTransform(D3DTS_WORLD, &matWorld)처럼 해야 하드웨어가속 받을 수 있음.
+  2. view(camera) : 월드좌표에 위치한 물체를 보기위한 좌표계
+     - 월드좌표계를 카메라 좌표계로 변환하는 작업이 필요함
+     - D3DMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec ) => SetTransform( D3DTS_VIEW, &matView )
+  3. projection : 화면에 표시하기 위한 2차원좌표계
+     - " https://docs.google.com/viewer?a=v&q=cache:8tlwO2wlTdEJ:visbic.cse.pusan.ac.kr/~dhlee/course/s07/CG/data/lect06-s4.pdf+%EC%9B%90%EA%B7%BC%ED%88%AC%ED%98%95&hl=ko&gl=jp&pid=bl&srcid=ADGEEShySh0SEasbNio5fGGh79JHFpKlArVhkx0dHdVVFQB6dQ3-XOzyRvh3PQoyBi18TAwe5IDkEpKWN3HVqWPs_QePk5LKciIi7gHwTDx83_qBw8hZQaTbi1VouMmY5L0w_mh2weFK&sig=AHIEtbRH2NL4jek8ZJw_jAeFWdWfGZG8kg "
+     - 평행 투영(parallel projection)
+       - Orthographic projection
+       - Oblique projection
+     - 원근투영(perspective projection)
+     - D3DXMatrixPerspectiveForLH( &matProj, tov, Sw/Sh, Zn, Zf ) => SetTransform( D3DTS_PROJECTION, &matProj )
+- local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
+- 뒤에 "LH"라 붙었는데, Left Hand의 약자일듯? 
 
-world : 물체를 서로 다르게 출력하기 위한 좌표계
- - TM(Transform Matrix)
-  - local =TM=> world
-  - TM은 모든 물체마다 고유하게 하나씩 존재
-  - SetTransform(D3DTS_WORLD, &matWorld)처럼 해야 하드웨어가속 받을 수 있음.
+#+BEGIN_SRC c++
+// D3DXMatrixLookAtLH function
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb205342%28v=vs.85%29.aspx
+D3DXMATRIX* D3DXMatrixLookAtLH(
+  __inout  D3DXMATRIX *pOut,        // 변환 행렬
+  __in     const D3DXVECTOR3 *pEye, // 카메라 위치
+  __in     const D3DXVECTOR3 *pAt,  // 카메라가 바라보는 위치
+  __in     const D3DXVECTOR3 *pUp   // 카메라 상방벡터
+);
+// :Remarks 부분 잘 볼것.
+#+END_SRC
 
-view(camera) : 월드좌표에 위치한 물체를 보기위한 좌표계
- - 월드좌표계를 카메라 좌표계로 변환하는 작업이 필요함
- - D3DMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec ) => SetTransform( D3DTS_VIEW, &matView )
-
-projection : 화면에 표시하기 위한 2차원좌표계
- " https://docs.google.com/viewer?a=v&q=cache:8tlwO2wlTdEJ:visbic.cse.pusan.ac.kr/~dhlee/course/s07/CG/data/lect06-s4.pdf+%EC%9B%90%EA%B7%BC%ED%88%AC%ED%98%95&hl=ko&gl=jp&pid=bl&srcid=ADGEEShySh0SEasbNio5fGGh79JHFpKlArVhkx0dHdVVFQB6dQ3-XOzyRvh3PQoyBi18TAwe5IDkEpKWN3HVqWPs_QePk5LKciIi7gHwTDx83_qBw8hZQaTbi1VouMmY5L0w_mh2weFK&sig=AHIEtbRH2NL4jek8ZJw_jAeFWdWfGZG8kg "
- - 평행 투영(parallel projection)
-  - Orthographic projection
-  - Oblique projection
- - 원근투영(perspective projection)
- - D3DXMatrixPerspectiveForLH( &matProj, tov, Sw/Sh, Zn, Zf ) => SetTransform( D3DTS_PROJECTION, &matProj )
-
-local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
+#+BEGIN_SRC c++
+// D3DXMatrixPerspectiveFovLH function
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb205350%28v=vs.85%29.aspx
+D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
+  __inout  D3DXMATRIX *pOut, // 변환 행렬
+  __in     FLOAT fovy,       // Field Of View(시야각)
+  __in     FLOAT Aspect,     // 가로세로비율.
+  __in     FLOAT zn,         // near clipping plane
+  __in     FLOAT zf          // far clipping plane
+);
+// :Remarks 이 역시 변환 과정 잘 살펴볼것.
+#+END_SRC
 
 :TODO 행렬변환 해보기 in math
 local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport

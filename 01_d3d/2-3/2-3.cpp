@@ -66,13 +66,14 @@ VOID SetupMatrices()
     D3DXMATRIXA16 view_matrix;
 
     D3DXVECTOR3 eye_pos( 0.0f, 3.0f, -5.0f );
-    D3DXVECTOR3 look_dir( 0.0f, 0.0f, 0.0f );
+    D3DXVECTOR3 look_pos( 0.0f, 0.0f, 0.0f );
     D3DXVECTOR3 upper_vector ( 0.0f, 1.0f, 0.0f );
 
-    D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_dir, &upper_vector );
+    D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_pos, &upper_vector );
     g_pd3dDevice->SetTransform( D3DTS_VIEW, &view_matrix );
 
     // projection
+
     D3DXMATRIXA16 proj_matrix;
     float fov = D3DX_PI / 4; // Field Of View
     float ar  = 1.0f;        // aspect ratio
