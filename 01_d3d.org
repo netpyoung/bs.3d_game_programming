@@ -1,0 +1,171 @@
+* 1부. 기본 초식
+** 01장. 3D 기초용어와 이론
+"용어와 개념을 잘 이해하는게 중요"
+"용어는 원어를 반드시 함께 알아두는 것이 도움이 될꺼임"
+
+*** 01. 기초용어
+- 3D Coordinate System
+- D3D는 왼손좌표계(left-handed Cartesian Coordinates)
+  - http://en.wikipedia.org/wiki/Cartesian_coordinate_system#In_three_dimensions
+- % Cartesian
+  - 근대 철학의 아버지 '데카르트'.
+  - '방법서설'의 부록 '기하학'에서 '좌표'란 개넘을 제시.
+  - 업적을 기리기 위해, 직교하는 직선들이 만드는 좌표계를 데카르트_좌표계(Cartesian Coordinates)라 부름.
+- Vector : 크기 + 방향
+- transform : transition, rotation, scale, shear(전단:절단하는것)
+  - affinity (affine transform) : transition, scale, shear으로만 이루어진 행렬
+    - "Translation, geometric contraction, expansion, dilation, reflection, rotation, shear, similarity transformations, and spiral similarities are all affine transformations, as are their combinations." in http://en.wikipedia.org/wiki/Affine_transform
+- vertex : 오브젝트를 구성하는 요소(점)
+- edge : 정점사이를 연결하는 직선
+- polygon : 3개의 정점이 모여 만들어진 삼각형 면(face)
+- mesh : 폴리곤을 모아 하나의 3차원 물체를 만든것
+- Shading : 폴리곤에 음영을 넣는 작업
+  - 대부분의 비디오 카드에서 지원하는 것
+    - flat shading   : 면의 법선벡터 + 조명벡터
+    - gouraud shding : 정점의 법선벡터 + 조명벡터
+  - 대부분 직접 구현
+    - phong shading  : 픽셀의 법선벡터 + 조명벡터
+    - radiosity
+    - ratracing
+- Texture : 3차원 물체에 2차원의 이미지를 입혀서 폴리곤으로 나타내는걸 가능케함.
+  - mapping : 3차원 정점에 2차원 이미지를 입히는것
+- z-buffer(깊이버퍼) : 화면에 그려질 우선 순위를 결정
+  - DOF(depth of field), mothion blur, shadowing 등에 응용되어 쓰임.
+    
+** 02장. 따라해보기
+*** 01. 개요 ( skipped )
+*** 02. 디바이스 생성
+- 책예제소스 : http://www.hanb.co.kr/exam/1733/3DGame2ndEd.zip
+- 환경설정 ( http://blog.naver.com/PostView.nhn?blogId=gudejrdl102&logNo=150075456314 )
+  - 문자집합 : 멀티바이트 문자 집합 사용
+  - C/C++ : $(DXSDK_DIR)\include
+  - 링커  : $(DXSDK_DIR)\Lib\x86
+  - 종속성 : dxerr.lib d3dxof.lib d3d9.lib d3dx9d.lib winmm.lib dxguid.lib d3dx9.lib
+- 소스 : 프로젝트2-1(01_d3d)참조
+
+#+BEGIN_SRC c++
+// IDirect3D9::CreateDevice method 
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb174313%28v=vs.85%29.aspx
+HRESULT CreateDevice(
+  [in]           UINT Adapter,          // 디바이스 생성할 화면 아답터(순서 번호)
+  [in]           D3DDEVTYPE DeviceType, // D3DDEVTYPE_HAL | D3DDEVTYPE_SW | D3DDEVTYPE_REF | ...
+  [in]           HWND hFocusWindow,
+  [in]           DWORD BehaviorFlags,   // D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_HARDWARE_VERTEXPROCESSING | ...
+  [in, out]      D3DPRESENT_PARAMETERS *pPresentationParameters,
+  [out, retval]  IDirect3DDevice9 **ppReturnedDeviceInterface
+);
+#+END_SRC
+
+!! 메시지루프(WM_CLOSE, WM_DESTROY등)에서 D3D를 해제할 경우 메시지 루프에서 문제가 생길 수 있다.
+--------------------------------------------------------------------------------
+*** 03. 정점버퍼
+- 소스 : 2-2 참조
+
+GetMessage()  : 새로 들어온 메시지가, 이전 들어온 메시지와 같으면 대기상태
+PeekMessage() : 메시지가 있으면 처리, 없으면 곧바로 다음 문장으로
+
+정점버퍼 : 비디오메모리 | 시스템메모리
+ - 비디오메모리 : GPU에 의해 정점쉐이더, T&L(Tranformation & Lighting가속) 등 하드웨어 가속 이용가능. 메모리제약
+ - 시스템메모리 : 하드웨어 가속 불가능. 보다 풍부한 메모리
+ 
+#+BEGIN_SRC c++
+// IDirect3DDevice9::CreateVertexBuffer method 
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb174364%28v=vs.85%29.aspx
+
+HRESULT CreateVertexBuffer(
+  [in]           UINT Length,  // 생성 버퍼 크기(byte단위)
+  [in]           DWORD Usage,  // 버퍼종류, 처리방식(SW | HW)
+  [in]           DWORD FVF,    // FVF flag
+  [in]           D3DPOOL Pool, // 메모리 풀 위치(Video | System), 관리방식(Managed | Default | *Dynamic_Default | *System | *Scratch)
+  [out, retval]  IDirect3DVertexBuffer9 **ppVertexBuffer, // 반환정점버퍼
+  [in]           HANDLE *pSharedHandle // 예약됨(무조건 NULL)
+);
+#+END_SRC
+
+#+BEGIN_SRC c++
+// IDirect3DIndexBuffer9::Lock method
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb172568%28v=vs.85%29.aspx
+
+HRESULT Lock(
+  [in]   UINT OffsetToLock, // 락을걸 버퍼의 시작offset
+  [in]   UINT SizeToLock,   // 버퍼크기
+  [out]  VOID **ppbData,    // 락을건 메모리 포인터
+  [in]   DWORD Flags        // 0 | ...
+);
+#+END_SRC
+
+#+BEGIN_SRC c++
+// IDirect3DDevice9::SetStreamSource method 
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb174459%28v=vs.85%29.aspx
+HRESULT SetStreamSource(
+  [in]  UINT StreamNumber, // 데이터 스트림 0 ~ -1(max)
+  [in]  IDirect3DVertexBuffer9 *pStreamData, // 정점버퍼
+  [in]  UINT OffsetInBytes, // (커스텀)정점크기
+  [in]  UINT Stride         // MSDN Remarks참조
+);
+// :NOTE stride - 동일하거나 비슷한 지형(그려야할 인스터스)를 여러번 그리고자할때, stride를 0으로 지정하면, runtime에 vertex버퍼의 크기를 증가시키지 않는다.(인스턴스 모두 동일한 버텍스 데이터를 이용한다)
+#+END_SRC
+
+#+BEGIN_SRC c++
+// IDirect3DDevice9::SetFVF method 
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb174433%28v=vs.85%29.aspx
+
+HRESULT SetFVF(
+    // ex) #define D3DFVF_CUSTOMVERTEX ( D3DFVF_XYZRHW | D3DFVF_DIFFUSE )
+    //     d->SetFVF( D3DFVF_CUSTOMVERTEX )
+  [in]  DWORD FVF // MSND Remarks 참조
+);
+// :NOTE vertex를 초기화 및 이용하는 단계를 주의해야함.
+#+END_SRC
+
+#+BEGIN_SRC c++
+// IDirect3DDevice9::DrawPrimitive method 
+// http://msdn.microsoft.com/en-us/library/windows/desktop/bb174371%28v=vs.85%29.aspx
+
+HRESULT DrawPrimitive(
+  [in]  D3DPRIMITIVETYPE PrimitiveType, // enum D3DPRIMITIVETYPE (D3DPT_POINTLIST | D3DPT_LINELIST | D3DPT_LINESTRIP | D3DPT_TRIANGLELIST | D3DPT_TRIANGLESTRIP | D3DPT_TRIANGLEFAN | D3DPT_FORCE_DWORD )
+  [in]  UINT StartVertex,   // 로드될 첫번째 vertex의 인덱스
+  [in]  UINT PrimitiveCount // 
+);
+
+// :NOTE 변종 - *DrwaIndexedPrimitive(가장빠름), DrawPrimitiveUP, *DrawIndexedPrimitiveUP, ...
+#+END_SRC
+  
+
+:TODO 균질 좌표계(Homogeneous Coordinate System)란?
+
+:TODO FVF(Flexible Vertex Format) 구조 44page
+[[file:./imgs/fvfmem.gif]]
+
+:TODO 소스 MSDN및 하단 링크 읽기
+- Indexed Vertex Blending (Direct3D 9) http://msdn.microsoft.com/en-us/library/windows/desktop/bb174594%28v=vs.85%29.aspx
+- Using Indexed Vertex Blending (Direct3D 9)  http://msdn.microsoft.com/en-us/library/windows/desktop/bb206316%28v=vs.85%29.aspx
+- 3D Game Programming Basic with Direct3D  https://docs.google.com/viewer?a=v&q=cache:m1P_e1MuIKMJ:3dapi.com/bs22_3d_basic/bs22_3d05_primitive.pdf+Flexible+Vertex+Format+blending+weight+5th&hl=ko&gl=jp&pid=bl&srcid=ADGEESgHoE32epxY639jEd1m8feErtJZKiBeH5ALptLVe3YKrvT75rmT_DzmURRUcQTlM3L7IBIlF0mkBIKdK2QidSzqmRYDh8cKMXg4bCn2JWZujwZmLuZ8XkLhjowLPvE4YH6sFh_y&sig=AHIEtbRwDxKOyl7XEXb-XMiAqCyF3xucaQ
+
+
+--------------------------------------------------------------------------------
+*** 04. 행렬
+world, view(camera), projection
+
+world : 물체를 서로 다르게 출력하기 위한 좌표계
+ - TM(Transform Matrix)
+  - local =TM=> world
+  - TM은 모든 물체마다 고유하게 하나씩 존재
+  - SetTransform(D3DTS_WORLD, &matWorld)처럼 해야 하드웨어가속 받을 수 있음.
+
+view(camera) : 월드좌표에 위치한 물체를 보기위한 좌표계
+ - 월드좌표계를 카메라 좌표계로 변환하는 작업이 필요함
+ - D3DMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec ) => SetTransform( D3DTS_VIEW, &matView )
+
+projection : 화면에 표시하기 위한 2차원좌표계
+ " https://docs.google.com/viewer?a=v&q=cache:8tlwO2wlTdEJ:visbic.cse.pusan.ac.kr/~dhlee/course/s07/CG/data/lect06-s4.pdf+%EC%9B%90%EA%B7%BC%ED%88%AC%ED%98%95&hl=ko&gl=jp&pid=bl&srcid=ADGEEShySh0SEasbNio5fGGh79JHFpKlArVhkx0dHdVVFQB6dQ3-XOzyRvh3PQoyBi18TAwe5IDkEpKWN3HVqWPs_QePk5LKciIi7gHwTDx83_qBw8hZQaTbi1VouMmY5L0w_mh2weFK&sig=AHIEtbRH2NL4jek8ZJw_jAeFWdWfGZG8kg "
+ - 평행 투영(parallel projection)
+  - Orthographic projection
+  - Oblique projection
+ - 원근투영(perspective projection)
+ - D3DXMatrixPerspectiveForLH( &matProj, tov, Sw/Sh, Zn, Zf ) => SetTransform( D3DTS_PROJECTION, &matProj )
+
+local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
+
+:TODO 행렬변환 해보기 in math
+local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
