@@ -63,23 +63,23 @@ VOID SetupMatrices()
     g_pd3dDevice->SetTransform( D3DTS_WORLD, &world_matrix );
     
     // view
-	D3DXMATRIXA16 view_matrix;
+    D3DXMATRIXA16 view_matrix;
 
-	D3DXVECTOR3 eye_pos( 0.0f, 3.0f, -5.0f );
-	D3DXVECTOR3 look_dir( 0.0f, 0.0f, 0.0f );
-	D3DXVECTOR3 upper_vector ( 0.0f, 1.0f, 0.0f );
+    D3DXVECTOR3 eye_pos( 0.0f, 3.0f, -5.0f );
+    D3DXVECTOR3 look_dir( 0.0f, 0.0f, 0.0f );
+    D3DXVECTOR3 upper_vector ( 0.0f, 1.0f, 0.0f );
 
-	D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_dir, &upper_vector );
-	g_pd3dDevice->SetTransform( D3DTS_VIEW, &view_matrix );
+    D3DXMatrixLookAtLH( &view_matrix, &eye_pos, &look_dir, &upper_vector );
+    g_pd3dDevice->SetTransform( D3DTS_VIEW, &view_matrix );
 
     // projection
-	D3DXMATRIXA16 proj_matrix;
-	float fov = D3DX_PI / 4; // Field Of View
-	float ar  = 1.0f;        // aspect ratio
-	float ncp = 1.0f;        // near clipping plane
-	float fcp = 100.0f;      // far clipping plane
-	D3DXMatrixPerspectiveLH( &proj_matrix, fov, ar, ncp, fcp );
-	g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &proj_matrix );
+    D3DXMATRIXA16 proj_matrix;
+    float fov = D3DX_PI / 4; // Field Of View
+    float ar  = 1.0f;        // aspect ratio
+    float ncp = 1.0f;        // near clipping plane
+    float fcp = 100.0f;      // far clipping plane
+    D3DXMatrixPerspectiveLH( &proj_matrix, fov, ar, ncp, fcp );
+    g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &proj_matrix );
 }
 
 
