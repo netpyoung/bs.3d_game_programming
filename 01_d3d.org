@@ -210,5 +210,9 @@ D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
     - directional : 광원의 위치는 상관없고, 방향이 중요.
     - spot        : 특정 위치, 범위에만 비치는 조명.
 *** 06. 텍스처
+- uv mapping
+  - http://en.wikipedia.org/wiki/UV_mapping
+- :TODO 한번 읽어보기.
+  - http://icoder.tistory.com/entry/tut05textures
 *** 07. 메시
 *** 08. 인덱스 버퍼
