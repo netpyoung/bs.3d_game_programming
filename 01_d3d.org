@@ -1,7 +1,7 @@
 * 1부. 기본 초식
 ** 01장. 3D 기초용어와 이론
-"용어와 개념을 잘 이해하는게 중요"
-"용어는 원어를 반드시 함께 알아두는 것이 도움이 될꺼임"
+- "용어와 개념을 잘 이해하는게 중요"
+- "용어는 원어를 반드시 함께 알아두는 것이 도움이 될꺼임"
 
 *** 01. 기초용어
 - 3D Coordinate System
@@ -82,13 +82,13 @@ HRESULT CreateVertexBuffer(
 #+END_SRC
 - 버퍼 3종류.
   - mixed모드 같은 경우, 디바이스 생성후 software와 hardware간의 변경이 필요할때 필요함.
-    1. D3DCREATE_HARDWARE_VERTEXPROCESSING
-       - Usage(must) : 0
-    2. D3DCREATE_SOFTWARE_VERTEXPROCESSING
-       - Usage(must) : 0 | D3DUSAGE_SOFTWAREPROCESSING
-    3. D3DCREATE_MIXED_VERTEXPROCESSING
-       - Usage(can) : 0 | D3DUSAGE_SOFTWAREPROCESSING
-       - IDirect3DDevice9::SetStreamSource과 IDirect3DDevice9::SetRenderState를 이용하여 vertex를 설정
+    - D3DCREATE_HARDWARE_VERTEXPROCESSING
+      - Usage(must) : 0
+    - D3DCREATE_SOFTWARE_VERTEXPROCESSING
+      - Usage(must) : 0 | D3DUSAGE_SOFTWAREPROCESSING
+    - D3DCREATE_MIXED_VERTEXPROCESSING
+      - Usage(can) : 0 | D3DUSAGE_SOFTWAREPROCESSING
+      - IDirect3DDevice9::SetStreamSource과 IDirect3DDevice9::SetRenderState를 이용하여 vertex를 설정
 
 #+BEGIN_SRC c++
 // IDirect3DIndexBuffer9::Lock method
@@ -151,21 +151,21 @@ HRESULT DrawPrimitive(
 
 *** 04. 행렬
 - world, view(camera), projection
-  1. world : 물체를 서로 다르게 출력하기 위한 좌표계
-     - TM(Transform Matrix)
-       - local =TM=> world
-       - TM은 모든 물체마다 고유하게 하나씩 존재
-       - SetTransform(D3DTS_WORLD, &matWorld)처럼 해야 하드웨어가속 받을 수 있음.
-  2. view(camera) : 월드좌표에 위치한 물체를 보기위한 좌표계
-     - 월드좌표계를 카메라 좌표계로 변환하는 작업이 필요함
-     - D3DMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec ) => SetTransform( D3DTS_VIEW, &matView )
-  3. projection : 화면에 표시하기 위한 2차원좌표계
-     - " https://docs.google.com/viewer?a=v&q=cache:8tlwO2wlTdEJ:visbic.cse.pusan.ac.kr/~dhlee/course/s07/CG/data/lect06-s4.pdf+%EC%9B%90%EA%B7%BC%ED%88%AC%ED%98%95&hl=ko&gl=jp&pid=bl&srcid=ADGEEShySh0SEasbNio5fGGh79JHFpKlArVhkx0dHdVVFQB6dQ3-XOzyRvh3PQoyBi18TAwe5IDkEpKWN3HVqWPs_QePk5LKciIi7gHwTDx83_qBw8hZQaTbi1VouMmY5L0w_mh2weFK&sig=AHIEtbRH2NL4jek8ZJw_jAeFWdWfGZG8kg "
-     - 평행 투영(parallel projection)
-       - Orthographic projection
-       - Oblique projection
-     - 원근투영(perspective projection)
-     - D3DXMatrixPerspectiveForLH( &matProj, tov, Sw/Sh, Zn, Zf ) => SetTransform( D3DTS_PROJECTION, &matProj )
+  - world : 물체를 서로 다르게 출력하기 위한 좌표계
+    - TM(Transform Matrix)
+      - local =TM=> world
+      - TM은 모든 물체마다 고유하게 하나씩 존재
+      - SetTransform(D3DTS_WORLD, &matWorld)처럼 해야 하드웨어가속 받을 수 있음.
+  - view(camera) : 월드좌표에 위치한 물체를 보기위한 좌표계
+    - 월드좌표계를 카메라 좌표계로 변환하는 작업이 필요함
+    - D3DMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec ) => SetTransform( D3DTS_VIEW, &matView )
+  - projection : 화면에 표시하기 위한 2차원좌표계
+    - " https://docs.google.com/viewer?a=v&q=cache:8tlwO2wlTdEJ:visbic.cse.pusan.ac.kr/~dhlee/course/s07/CG/data/lect06-s4.pdf+%EC%9B%90%EA%B7%BC%ED%88%AC%ED%98%95&hl=ko&gl=jp&pid=bl&srcid=ADGEEShySh0SEasbNio5fGGh79JHFpKlArVhkx0dHdVVFQB6dQ3-XOzyRvh3PQoyBi18TAwe5IDkEpKWN3HVqWPs_QePk5LKciIi7gHwTDx83_qBw8hZQaTbi1VouMmY5L0w_mh2weFK&sig=AHIEtbRH2NL4jek8ZJw_jAeFWdWfGZG8kg "
+    - 평행 투영(parallel projection)
+      - Orthographic projection
+      - Oblique projection
+    - 원근투영(perspective projection)
+    - D3DXMatrixPerspectiveForLH( &matProj, tov, Sw/Sh, Zn, Zf ) => SetTransform( D3DTS_PROJECTION, &matProj )
 - local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
 - 뒤에 "LH"라 붙었는데, Left Hand의 약자일듯? 
 
@@ -195,4 +195,20 @@ D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
 #+END_SRC
 
 :TODO 행렬변환 해보기 in math
-local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
+    local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
+*** 05. 광원
+- Material
+  - ambient  : 광원의 위치와 무관하게 모든 점에 반사되는 색.
+  - diffuse  : 광원에 반사될 때 출력되는 가장 주된 색.
+  - specular : 특정한 방향으로만 반사되는 색.
+  - emissive : 메시 표면에서 자체적으로 방출되는 색(단, 다른 메시에 영향을 미치진 않음)
+- Light
+  - device->SetRenderState
+    - ambient     : 3차원 공간내, 메시 배치 및 위치와 전혀 상관 없음.(색과 강도만이 존재)
+  - device->SetLight && device->LightEnable
+    - point       : 백열전구라 보면 됨.
+    - directional : 광원의 위치는 상관없고, 방향이 중요.
+    - spot        : 특정 위치, 범위에만 비치는 조명.
+*** 06. 텍스처
+*** 07. 메시
+*** 08. 인덱스 버퍼
