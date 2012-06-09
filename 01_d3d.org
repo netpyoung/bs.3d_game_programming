@@ -14,6 +14,7 @@
 - Vector : 크기 + 방향
 - transform : transition, rotation, scale, shear(전단:절단하는것)
   - affinity (affine transform) : transition, scale, shear으로만 이루어진 행렬
+    - affine : 라틴어에서 왔구, "connected with"라는 뜻을 가짐.
     - "Translation, geometric contraction, expansion, dilation, reflection, rotation, shear, similarity transformations, and spiral similarities are all affine transformations, as are their combinations." in http://en.wikipedia.org/wiki/Affine_transform
 - vertex : 오브젝트를 구성하는 요소(점)
 - edge : 정점사이를 연결하는 직선
@@ -210,9 +211,24 @@ D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
     - directional : 광원의 위치는 상관없고, 방향이 중요.
     - spot        : 특정 위치, 범위에만 비치는 조명.
 *** 06. 텍스처
+- 텍스처사용
+  - IDirect3DTexture9 인터페이스 선언
+  - 텍스처 좌표를 갖는 정점 선언.
+  - 텍스처 생성.         // D3DXCreateTextureFromfile(d, 
+  - 텍스처 스테이지 설정. // d->SetTextureStageState
+  - 텍스처 지정.         // d->SetTexture
+  - 메시 그리기.         // d-> DrawPrimitive
+#+BEGIN_SRC c++
+// 와이어 프레임 모드.
+d->DrawPrimitive( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
+#+END_SRC
 - uv mapping
   - http://en.wikipedia.org/wiki/UV_mapping
 - :TODO 한번 읽어보기.
   - http://icoder.tistory.com/entry/tut05textures
 *** 07. 메시
+- X File
+  - DirectX 9에서 지원하는 3차원 매시파일 포맷(.X)
+  - DirectX 10, 11 은 지원하지 않음. (대신 sdkmesh지원)
+
 *** 08. 인덱스 버퍼
