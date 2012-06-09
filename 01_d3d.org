@@ -246,3 +246,5 @@ d->DrawPrimitive( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
   - vertex를 여러번 나열하는 것보다 메모리 소모량이 적다.
   - vertex를 cache에 저장해서 더 높은 효율을 낼 수 있다.
     - [[C:\Program Files\Microsoft DirectX SDK (August 2008)\Samples\C++\Direct3D\OptimizedMesh\]]
+
+** 03장. DXUT 프레임워크 (skipped)
