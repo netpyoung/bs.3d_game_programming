@@ -151,6 +151,7 @@ HRESULT DrawPrimitive(
 - 3D Game Programming Basic with Direct3D  https://docs.google.com/viewer?a=v&q=cache:m1P_e1MuIKMJ:3dapi.com/bs22_3d_basic/bs22_3d05_primitive.pdf+Flexible+Vertex+Format+blending+weight+5th&hl=ko&gl=jp&pid=bl&srcid=ADGEESgHoE32epxY639jEd1m8feErtJZKiBeH5ALptLVe3YKrvT75rmT_DzmURRUcQTlM3L7IBIlF0mkBIKdK2QidSzqmRYDh8cKMXg4bCn2JWZujwZmLuZ8XkLhjowLPvE4YH6sFh_y&sig=AHIEtbRwDxKOyl7XEXb-XMiAqCyF3xucaQ
 
 *** 04. 행렬
+- 2-3.cpp
 - world, view(camera), projection
   - world : 물체를 서로 다르게 출력하기 위한 좌표계
     - TM(Transform Matrix)
@@ -198,6 +199,7 @@ D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
 :TODO 행렬변환 해보기 in math
     local => Rendering pipeline 일부[ =TM=>  world => view(camera) => projection] => viewport
 *** 05. 광원
+- 2-4.cpp
 - Material
   - ambient  : 광원의 위치와 무관하게 모든 점에 반사되는 색.
   - diffuse  : 광원에 반사될 때 출력되는 가장 주된 색.
@@ -211,6 +213,7 @@ D3DXMATRIX* D3DXMatrixPerspectiveFovLH(
     - directional : 광원의 위치는 상관없고, 방향이 중요.
     - spot        : 특정 위치, 범위에만 비치는 조명.
 *** 06. 텍스처
+- 2-5.cpp
 - 텍스처사용
   - IDirect3DTexture9 인터페이스 선언
   - 텍스처 좌표를 갖는 정점 선언.
@@ -227,8 +230,19 @@ d->DrawPrimitive( D3DRS_FILLMODE, D3DFILL_WIREFRAME );
 - :TODO 한번 읽어보기.
   - http://icoder.tistory.com/entry/tut05textures
 *** 07. 메시
+- 2-6.cpp
 - X File
   - DirectX 9에서 지원하는 3차원 매시파일 포맷(.X)
   - DirectX 10, 11 은 지원하지 않음. (대신 sdkmesh지원)
-
+    - http://www.toymaker.info/Games/html/3d_models.html
+  - 모든 메시파일은 여러개의 폴리곤으로 구성.
+  - 폴리곤마다 서로 다른 재질을 가질 수 있다.
+  - 대부분 재질이 여러개일 경우, 메시를 재질에 따라 부분메시로 분할한다.
+    - 부분메시는 부분별로 그려야함.( DrawSubset )
 *** 08. 인덱스 버퍼
+- 2-7.cpp
+
+- Index Buffer
+  - vertex를 여러번 나열하는 것보다 메모리 소모량이 적다.
+  - vertex를 cache에 저장해서 더 높은 효율을 낼 수 있다.
+    - [[C:\Program Files\Microsoft DirectX SDK (August 2008)\Samples\C++\Direct3D\OptimizedMesh\]]
