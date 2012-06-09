@@ -141,7 +141,7 @@ VOID SetupMatrices()
     float ar  = 1.0f;
     float ncp = 1.0f;
     float fcp = 100.0f;
-    D3DXMatrixPerspectiveLH( &proj_matrix, fov, ar, ncp, fcp );
+    D3DXMatrixPerspectiveFovLH( &proj_matrix, fov, ar, ncp, fcp );
     g_pd3dDevice->SetTransform( D3DTS_PROJECTION, &proj_matrix );
 }
 
